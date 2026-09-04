@@ -1,0 +1,15 @@
+<dialog #dialog class="p-0 border-0 rounded-3 shadow">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title h5">{{ title }}</h2>
+      <button type="button" class="btn-close" aria-label="Stäng" (click)="close()"></button>
+    </div>
+    <div class="modal-body">
+      <p class="mb-0">{{ message }}</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">Avbryt</button>
+      <button type="button" class="btn btn-danger" (click)="confirm()">Ta bort</button>
+    </div>
+  </div>
+</dialog>

@@ -1,0 +1,58 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+      <h1 class="h3 mb-4 text-center">Logga in</h1>
+
+      @if (sessionExpired) {
+        <div class="alert alert-warning" role="alert">Din session har gått ut. Logga in igen.</div>
+      }
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="mb-3">
+          <label for="email" class="form-label">E-postadress</label>
+          <input
+            id="email"
+            type="email"
+            class="form-control"
+            formControlName="email"
+            autocomplete="email"
+            [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched"
+          />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <div class="invalid-feedback">Ange en giltig e-postadress.</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Lösenord</label>
+          <input
+            id="password"
+            type="password"
+            class="form-control"
+            formControlName="password"
+            autocomplete="current-password"
+            [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched"
+          />
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <div class="invalid-feedback">Lösenord krävs.</div>
+          }
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" [disabled]="form.invalid || isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          }
+          Logga in
+        </button>
+      </form>
+
+      <p class="text-center mt-3 mb-0">
+        Inget konto? <a routerLink="/register">Registrera dig</a>
+      </p>
+    </div>
+  </div>
+</div>
