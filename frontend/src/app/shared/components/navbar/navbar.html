@@ -1,0 +1,48 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom mb-4">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" routerLink="/">
+      <i class="fa-solid fa-book-open me-2" aria-hidden="true"></i>BookQuotesApp
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#mainNav"
+      aria-controls="mainNav"
+      aria-expanded="false"
+      aria-label="Växla navigering"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      @if (currentUserEmail()) {
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/books" routerLinkActive="active">Böcker</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/quotes" routerLinkActive="active">Mina citat</a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <span class="text-body-secondary small">{{ currentUserEmail() }}</span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">
+            <i class="fa-solid fa-right-from-bracket me-1" aria-hidden="true"></i>Logga ut
+          </button>
+        </div>
+      } @else {
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/login" routerLinkActive="active">Logga in</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/register" routerLinkActive="active">Registrera dig</a>
+          </li>
+        </ul>
+      }
+    </div>
+  </div>
+</nav>
