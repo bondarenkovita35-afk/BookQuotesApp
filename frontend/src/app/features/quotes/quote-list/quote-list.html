@@ -1,0 +1,61 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Mina citat</h1>
+    <a routerLink="/quotes/new" class="btn btn-primary">
+      <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Lägg till citat
+    </a>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Laddar...</span>
+      </div>
+    </div>
+  } @else if (quotes().length === 0) {
+    <div class="text-center py-5 text-body-secondary">
+      <i class="fa-solid fa-quote-left fa-2x mb-3" aria-hidden="true"></i>
+      <p class="mb-0">Du har inga citat än. Lägg till ditt första citat för att komma igång.</p>
+    </div>
+  } @else {
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      @for (quote of quotes(); track quote.id) {
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <blockquote class="blockquote mb-0">
+                <p>{{ quote.text }}</p>
+                @if (quote.author) {
+                  <footer class="blockquote-footer mt-2">{{ quote.author }}</footer>
+                }
+              </blockquote>
+            </div>
+            <div class="card-footer bg-transparent d-flex justify-content-end gap-2">
+              <a
+                [routerLink]="['/quotes', quote.id, 'edit']"
+                class="btn btn-sm btn-outline-secondary"
+                aria-label="Redigera citat"
+              >
+                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+              </a>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                aria-label="Ta bort citat"
+                (click)="askDelete(quote.id, quote.text)"
+              >
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-confirm-dialog (confirmed)="confirmDelete()" />

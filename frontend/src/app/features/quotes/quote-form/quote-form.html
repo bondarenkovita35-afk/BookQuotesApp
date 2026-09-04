@@ -1,0 +1,50 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+      <h1 class="h3 mb-4">{{ isEditMode ? 'Redigera citat' : 'Lägg till citat' }}</h1>
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+      }
+
+      @if (isLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Laddar...</span>
+          </div>
+        </div>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="mb-3">
+            <label for="text" class="form-label">Citat</label>
+            <textarea
+              id="text"
+              class="form-control"
+              rows="4"
+              formControlName="text"
+              [class.is-invalid]="form.controls.text.invalid && form.controls.text.touched"
+            ></textarea>
+            @if (form.controls.text.invalid && form.controls.text.touched) {
+              <div class="invalid-feedback">Citattext krävs.</div>
+            }
+          </div>
+
+          <div class="mb-4">
+            <label for="author" class="form-label">Källa <span class="text-body-secondary">(valfritt)</span></label>
+            <input id="author" type="text" class="form-control" formControlName="author" />
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()">
+              @if (isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              }
+              Spara
+            </button>
+            <a routerLink="/quotes" class="btn btn-outline-secondary">Avbryt</a>
+          </div>
+        </form>
+      }
+    </div>
+  </div>
+</div>

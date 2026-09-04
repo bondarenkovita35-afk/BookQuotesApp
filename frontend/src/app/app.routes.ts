@@ -19,5 +19,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/books/books.routes').then((m) => m.BOOKS_ROUTES),
   },
+  {
+    path: 'quotes',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/quotes/quotes.routes').then((m) => m.QUOTES_ROUTES),
+  },
   { path: '**', redirectTo: 'books' },
 ];
