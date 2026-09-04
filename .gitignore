@@ -1,0 +1,30 @@
+## ---------- .NET / backend ----------
+backend/**/bin/
+backend/**/obj/
+backend/**/publish/
+*.user
+*.suo
+.vs/
+*.dbmdl
+*.dbproj.schemaview
+
+## ---------- Node / Angular / frontend ----------
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+npm-debug.log*
+
+## ---------- Secrets & local config (never commit) ----------
+*.env
+*.env.*
+appsettings.*.local.json
+**/appsettings.Secrets.json
+
+## ---------- IDE / OS ----------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store
+*.log
