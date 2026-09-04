@@ -1,0 +1,58 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Böcker</h1>
+    <a routerLink="/books/new" class="btn btn-primary">
+      <i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Lägg till bok
+    </a>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Laddar...</span>
+      </div>
+    </div>
+  } @else if (books().length === 0) {
+    <div class="text-center py-5 text-body-secondary">
+      <i class="fa-solid fa-book fa-2x mb-3" aria-hidden="true"></i>
+      <p class="mb-0">Du har inga böcker än. Lägg till din första bok för att komma igång.</p>
+    </div>
+  } @else {
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      @for (book of books(); track book.id) {
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h2 class="h5 card-title">{{ book.title }}</h2>
+              <p class="card-text text-body-secondary mb-1">{{ book.author }}</p>
+              <p class="card-text"><small class="text-body-secondary">Utgiven: {{ book.publishedDate }}</small></p>
+            </div>
+            <div class="card-footer bg-transparent d-flex justify-content-end gap-2">
+              <a
+                [routerLink]="['/books', book.id, 'edit']"
+                class="btn btn-sm btn-outline-secondary"
+                [attr.aria-label]="'Redigera ' + book.title"
+              >
+                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+              </a>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                [attr.aria-label]="'Ta bort ' + book.title"
+                (click)="askDelete(book.id, book.title)"
+              >
+                <i class="fa-solid fa-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-confirm-dialog (confirmed)="confirmDelete()" />

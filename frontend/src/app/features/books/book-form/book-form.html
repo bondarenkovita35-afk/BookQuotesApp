@@ -1,0 +1,73 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+      <h1 class="h3 mb-4">{{ isEditMode ? 'Redigera bok' : 'Lägg till bok' }}</h1>
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+      }
+
+      @if (isLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Laddar...</span>
+          </div>
+        </div>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="mb-3">
+            <label for="title" class="form-label">Titel</label>
+            <input
+              id="title"
+              type="text"
+              class="form-control"
+              formControlName="title"
+              [class.is-invalid]="form.controls.title.invalid && form.controls.title.touched"
+            />
+            @if (form.controls.title.invalid && form.controls.title.touched) {
+              <div class="invalid-feedback">Titel krävs.</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="author" class="form-label">Författare</label>
+            <input
+              id="author"
+              type="text"
+              class="form-control"
+              formControlName="author"
+              [class.is-invalid]="form.controls.author.invalid && form.controls.author.touched"
+            />
+            @if (form.controls.author.invalid && form.controls.author.touched) {
+              <div class="invalid-feedback">Författare krävs.</div>
+            }
+          </div>
+
+          <div class="mb-4">
+            <label for="publishedDate" class="form-label">Utgivningsdatum</label>
+            <input
+              id="publishedDate"
+              type="date"
+              class="form-control"
+              formControlName="publishedDate"
+              [class.is-invalid]="form.controls.publishedDate.invalid && form.controls.publishedDate.touched"
+            />
+            @if (form.controls.publishedDate.invalid && form.controls.publishedDate.touched) {
+              <div class="invalid-feedback">Utgivningsdatum krävs.</div>
+            }
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()">
+              @if (isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              }
+              Spara
+            </button>
+            <a routerLink="/books" class="btn btn-outline-secondary">Avbryt</a>
+          </div>
+        </form>
+      }
+    </div>
+  </div>
+</div>
