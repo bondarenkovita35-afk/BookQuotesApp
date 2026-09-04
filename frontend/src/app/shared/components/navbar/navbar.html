@@ -4,17 +4,32 @@
       <i class="fa-solid fa-book-open me-2" aria-hidden="true"></i>BookQuotesApp
     </a>
 
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#mainNav"
-      aria-controls="mainNav"
-      aria-expanded="false"
-      aria-label="Växla navigering"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <div class="d-flex align-items-center gap-2 order-lg-2">
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="toggleTheme()"
+        [attr.aria-label]="theme() === 'dark' ? 'Byt till ljust tema' : 'Byt till mörkt tema'"
+      >
+        @if (theme() === 'dark') {
+          <i class="fa-solid fa-sun" aria-hidden="true"></i>
+        } @else {
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+        }
+      </button>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mainNav"
+        aria-controls="mainNav"
+        aria-expanded="false"
+        aria-label="Växla navigering"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
 
     <div class="collapse navbar-collapse" id="mainNav">
       @if (currentUserEmail()) {
