@@ -124,6 +124,18 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+// Applicerar väntande migrationer automatiskt vid start. Enkelt och reproducerbart
+// för en enda instans utan skalning — vid flera samtidiga instanser hade en separat
+// migreringssteg i pipelinen varit säkrare för att undvika race conditions.
+// Görs inte i "Testing" — testfabriken byter ut SQL Server mot SQLite och bygger
+// sitt eget schema direkt, vilket krockar med SQL Server-migrationernas modellsnapshot.
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    var dbContext = migrationScope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
