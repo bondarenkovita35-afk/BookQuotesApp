@@ -20,6 +20,11 @@ public class ApiWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Hindrar Program.cs egen dbContext.Database.Migrate() från att köras här —
+        // SQL Server-migrationerna matchar inte SQLite-modellen, och testfabriken
+        // bygger redan sitt eget schema via EnsureCreated() nedan.
+        builder.UseEnvironment("Testing");
+
         builder.ConfigureAppConfiguration((_, config) =>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>

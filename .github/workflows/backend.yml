@@ -1,0 +1,56 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: dotnet restore
+        working-directory: backend
+
+      - name: Build (Release)
+        run: dotnet build --configuration Release --no-restore
+        working-directory: backend
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build
+        working-directory: backend
+
+      - name: Publish
+        run: dotnet publish BookQuotesApp.Api/BookQuotesApp.Api.csproj --configuration Release --no-build --output ./publish
+        working-directory: backend
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: api-publish
+          path: backend/publish
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: api-publish
+          path: publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: bookquotesapp-api
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: publish
