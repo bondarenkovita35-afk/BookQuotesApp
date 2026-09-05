@@ -96,11 +96,10 @@ Både `Book` och `Quote` har en obligatorisk relation till `User`. Varje endpoin
 # Backend
 cd backend/BookQuotesApp.Api
 dotnet user-secrets set "Jwt:SigningKey" "<en-lång-slumpad-sträng>"
-dotnet ef database update
 dotnet run
 ```
 
-API:et startar på `https://localhost:7156` och Swagger finns på `https://localhost:7156/swagger`.
+API:et applicerar väntande migrationer automatiskt vid start (även vid nästa uppstart, inget manuellt steg behövs). API:et startar på `https://localhost:7156` och Swagger finns på `https://localhost:7156/swagger`.
 
 ```bash
 # Frontend, i ett nytt terminalfönster
@@ -155,19 +154,34 @@ Frontendens produktionsfiler hamnar i `frontend/dist/frontend/browser`.
 
 ## Driftsättning
 
-**Planerad lösning:**
+**Publicerat:**
 
-- **Frontend:** Vercel, automatisk driftsättning från GitHub.
-- **Backend:** Azure App Service (Linux), prisnivå F1 (kostnadsfri).
-- **Databas:** Azure SQL Database, kostnadsfri nivå (100 000 vCore-sekunder och 32 GB lagring per månad, pausas automatiskt vid gränsen).
+- **Frontend:** https://bookquotesapp.vercel.app — Vercel, ansluten till detta GitHub-repo, bygger och publicerar automatiskt vid push till `main`.
+- **Backend:** https://bookquotesapp-api.azurewebsites.net — Azure App Service (Linux), region Sweden Central, prisnivå **F1 (kostnadsfri)**. Byggs, testas och publiceras automatiskt av GitHub Actions (`.github/workflows/backend.yml`) vid push till `main`.
+- **Databas:** Azure SQL Database `bookquotesapp-db` på servern `bookquotesapp-sql-server.database.windows.net`, via **kostnadsfri nivå** (100 000 vCore-sekunder och 32 GB lagring per månad). Vid överskriden gräns **pausas** databasen automatiskt till nästa månad — den växlar aldrig till betald fortsatt drift.
+- **Migrationer:** appliceras automatiskt vid varje uppstart av API:et (`dbContext.Database.Migrate()` i `Program.cs`), så en ny driftsättning innebär aldrig ett manuellt migreringssteg.
 
-Inga molnresurser är skapade ännu i det här skedet av projektet — resurser, region och kostnad gås igenom och godkänns separat innan något skapas.
+**Vad "kostnadsfritt" faktiskt betyder här:** F1-nivån och SQL-databasens kostnadsfria gräns är i sig permanent gratis, men de finns bara så länge själva Azure-prenumerationen ("Azure for Students") är aktiv och giltig. Om studentprenumerationen skulle avslutas eller inaktiveras försvinner resurserna oavsett tariff — kostnadsfriheten gäller nivån på resursen, inte en garanti om att prenumerationen alltid finns kvar. Ett budgetlarm är konfigurerat på prenumerationen som en varning — det **stoppar inga kostnader automatiskt**, det bara skickar ett meddelande om något ändå skulle börja kosta pengar.
+
+**Kända avvägningar med gratisnivåerna:**
+- **F1 har ingen "Always On".** Efter en stunds inaktivitet stängs appen av, och första anropet efter det tar några sekunder extra ("cold start") medan den startar om.
+- **SQL-brandväggen** tillåter Azure-plattformens hela pool av utgående IP-adresser (App Service på F1 delar infrastruktur med andra kunder och kan byta utgående IP), inte bara en enskild adress. Kompenseras av ett unikt slumpat lösenord, TLS-krypterad anslutning, en databasanvändare utan onödiga rättigheter, och att inga hemligheter någonsin skrivs till Git eller loggar.
+
+**Ta bort alla molnresurser** (en enda kommando, tar bort App Service-plan, Web App, SQL-server och SQL-databas i ett svep):
+
+```bash
+az group delete --name bookquotesapp-rg --yes
+```
+
+Frontend på Vercel tas bort separat via projektinställningarna på vercel.com, eller `vercel remove bookquotesapp`.
 
 ## API och Swagger
 
-I utvecklingsläge finns interaktiv API-dokumentation på `/swagger`. Alla endpoints under `/api/books` och `/api/quotes` kräver `Authorization: Bearer <token>`, hämtat från `/api/auth/login` eller `/api/auth/register`.
+Swagger (`/swagger`) är medvetet **bara aktiverat i utvecklingsläge**, avstängt i produktion — API:ets struktur ska inte vara offentligt utforskningsbar för vem som helst som hittar url:en. Detta är ett konfigurationsval i `Program.cs` (`if (app.Environment.IsDevelopment())`), inte en begränsning som saknades.
 
-Hälsokontroll för drift: `GET /health`.
+Alla endpoints under `/api/books` och `/api/quotes` kräver `Authorization: Bearer <token>`, hämtat från `/api/auth/login` eller `/api/auth/register`.
+
+Hälsokontroll för drift: `GET /health` — testad och fungerande i produktion på https://bookquotesapp-api.azurewebsites.net/health.
 
 ## Säkerhet
 
@@ -187,8 +201,11 @@ Hälsokontroll för drift: `GET /health`.
 ## Kända begränsningar
 
 - Ingen refresh-token — utgången session kräver ny inloggning.
-- Manuellt testat i Microsoft Edge. Chrome och Firefox var inte installerade i utvecklingsmiljön vid byggtillfället och har därför inte kunnat testas manuellt (de automatiserade frontend-testerna körs dock via Edge, som liksom Chrome bygger på Chromium).
+- **Sessionen är knuten till fliken:** token ligger i `sessionStorage`, så att stänga fliken loggar ut användaren. Ett medvetet val, se [Säkerhet](#säkerhet).
+- **F1 har ingen "Always On"** — första anropet efter en stunds inaktivitet kan ta några sekunder extra.
+- Manuellt testat i Microsoft Edge lokalt. Chrome och Firefox var inte installerade i den lokala utvecklingsmiljön, men de automatiserade frontend-testerna körs på riktig Chrome i CI (GitHub Actions, Ubuntu) vid varje push — så testsviten är körd på både Chromium-baserad Edge och riktig Chrome, bara inte manuellt av en människa i Chrome eller Firefox.
 - `npm audit` visar två måttliga sårbarheter i Karmas testberoenden (`qs`/`body-parser`) — påverkar endast lokal testkörning, inte produktionsbygget.
+- Gratisnivåerna i Azure gäller bara så länge prenumerationen är aktiv, se [Driftsättning](#driftsättning).
 
 ## Möjliga förbättringar
 
