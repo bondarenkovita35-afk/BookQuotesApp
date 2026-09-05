@@ -20,12 +20,6 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptio
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-if (string.IsNullOrWhiteSpace(builder.Configuration["Jwt:SigningKey"]))
-{
-    throw new InvalidOperationException(
-        "Jwt:SigningKey saknas. Sätt den via 'dotnet user-secrets' lokalt eller som miljövariabel i produktion.");
-}
-
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer();
@@ -123,6 +117,15 @@ builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("database");
 
 var app = builder.Build();
+
+// Kontrolleras här (efter Build) och inte tidigare på builder.Configuration — annars
+// läses värdet in innan WebApplicationFactory i testerna hunnit lägga på sin egen
+// konfiguration, vilket fick kontrollen att slå till felaktigt i CI.
+if (string.IsNullOrWhiteSpace(app.Configuration["Jwt:SigningKey"]))
+{
+    throw new InvalidOperationException(
+        "Jwt:SigningKey saknas. Sätt den via 'dotnet user-secrets' lokalt eller som miljövariabel i produktion.");
+}
 
 // Applicerar väntande migrationer automatiskt vid start. Enkelt och reproducerbart
 // för en enda instans utan skalning — vid flera samtidiga instanser hade en separat
